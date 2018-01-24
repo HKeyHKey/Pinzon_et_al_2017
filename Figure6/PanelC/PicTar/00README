@@ -1,0 +1,18 @@
+1. Data download:
+On http://dorina.mdc-berlin.de/ select 3´ UTR sites, "PicTar2 mammals miRNA:targets" (458456 sites on the day I did it: April 1, 2015): see 'Capture_PicTar_download.png'. Then download the resul as a TSV file named 'dorina.tsv'. The file has 1,030,419 lines.
+N.B.: if you don't select "3´ UTR", but "any", then the 'dorina.tsv' file contains 1,287,398 lines.
+
+Redone on November 2, 2015, selecting "PicTar2 miRNA:targets" (announcing 4116 sites: ?!? it's less than "mammals miRNA"). Results saved as 'dorina_noselect.tsv' (contains 10,557 lines).
+
+2. Analysis:
+***
+./Module_PicTar_false_positive_rate.pl dorina.tsv > Comparison_to_PicTar.dat
+***
+
+N.B.: PicTar does not consider some miRNAs (it uses miRBase v19 but it excludes some of its miRNAs):
+***
+./Module_verif.pl | grep -v '^>' | sort | uniq > seeds_in_dorina
+ls /mnt/data/home/herve.seitz/Blaise/miRNA_absence_verification_by_Herve/Parsing_Blaise_results/*-specific_2-7_seed_families_human-centered/Control*.dat | sed -e 's|.*Control_[A-Z][a-z]*_||' -e 's|_matches\.dat||' | sort | uniq > seeds_in_our_analysis
+cat seeds_in_dorina seeds_in_our_analysis seeds_in_our_analysis | sort | uniq -c | awk '{print $1}' | sort -g | uniq -c
+***
+So 24 out of 48 seeds with measured overconserved sites are not analyzed here.
