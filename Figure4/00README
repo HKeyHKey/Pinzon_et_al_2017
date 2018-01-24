@@ -1,0 +1,21 @@
+1. Data extraction, graph plotting for individual luciferase plate readings:
+***
+for s in mut1_wt1_120816 mut5_wt5_120816 wt2_mut2_120816 wt3_mut4_wt4_120816;do Rscript R_commands_luminometer_subtract_bkg $s;done
+***
+
+2. Concatenation of data for all cell ines:
+***
+echo "Line Firefly/Renilla_mean Firefly/Renilla_sd Firefly/Renilla_se" > All_lines.dat
+cat Numerical_results_summary_* | sed -e 's|^\[1\] *||' -e 's|"||g' -e 's|  *| |g' | grep -v 'Description F/R (mean) F/R (s.d.) F/R (s.e.)' >> All_lines.dat
+echo "Line Firefly/Renilla" > All_lines_detailed.dat
+cat Numerical_results_detailed_* | grep -v 'Description  *F.R' | sed -e 's|^[0-9]* *||' -e 's|  *| |g' >> All_lines_detailed.dat
+***
+
+3. Statistical testing (considering technical replicates within each cell line; including or excluding line 'wt4', which behaves so differently from the others):
+***
+grep -v '^wt4 ' All_lines_detailed.dat > All_lines_detailed_excluding_wt4.dat 
+Rscript R_detailed_display_all_cell_lines All_lines_detailed.dat
+Rscript R_detailed_display_all_cell_lines All_lines_detailed_excluding_wt4.dat
+***
+
+Conclusion: 'mutant' lines repress the firefly reporter significantly more than the 'wt' lines (p-value < 2.2e-16 for the 'genotype' factor, whether wt4 is included or excluded).
