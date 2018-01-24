@@ -1,0 +1,108 @@
+1. Data source:
+Supplementray table 1 of http://www.ncbi.nlm.nih.gov/pubmed/?term=18523451
+(saved as 'ejhg2008111x1.xls'). It first column (without the header "Gene"): saved as 'hsa_haploinsufficient_genes.txt'.
+TargetScan's data downloaded from http://www.targetscan.org/cgi-bin/targetscan/data_download.cgi?db=vert_70 on January 15, 2016.
+
+2. Nomenclature synchronization:
+***
+tail -n +2 Conserved_Family_Info.txt | awk -F '\t' '$5==9606 {print $3}' | sort | uniq > tmp_list_Conserved
+tail -n +2 Nonconserved_Family_Info.txt | awk -F '\t' '$5==9606 {print $3}' | sort | uniq > tmp_list_Nonconserved
+cat tmp_list_Conserved tmp_list_Nonconserved | sort | uniq > list_TargetScan_genes
+cat list_TargetScan_genes hsa_haploinsufficient_genes.txt hsa_haploinsufficient_genes.txt | sort | uniq -c | awk '{print $1}' | sort -g | uniq -c # Result: 19,066 gene names are only in the TargetScan list, 39 gene names are only in the Dang et al. list, and 260 gene names are in both lists.
+***
+
+For the 39 gene names present only in the Dang et al. list: some of them may indeed not be predicted miRNA targets, but some of them may appear in the TargetScan list under another name. Collection of their alternative names:
+***
+echo "Gene_name GenBank_ID Alternative_name" > Gene_name_synonyms.txt
+for gene in `cat list_TargetScan_genes hsa_haploinsufficient_genes.txt hsa_haploinsufficient_genes.txt | sort | uniq -c | grep '^ *2 ' | awk '{print $2}'` COUPTFII # I had to add 'COUPTFII' by hand at the end, because the Dang et al. paper added a hyphen in that name ('COUP-TFII')
+do wget -O tmp_download http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gene\&term=Homo+sapiens[orgn]$gene''[gene]live
+   for ID in `grep '^<Id>' tmp_download | sed -e 's|^<Id>||' -e 's|</Id>||'`
+   do wget -O tmp_download2 http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene\&id=$ID
+      sed '/^ *gene /,/^ *prot / !d' tmp_download2 | grep '^ *locus "' | sed 's|.*"\(.*\)".*|\1|' > tmp_alternative_names
+      sed '/^ *gene /,/^ *prot / !d' tmp_download2 | sed '/^ *syn {/,/^ *}/ !d' | grep -v '{' | grep -v '}' | sed 's|.*"\(.*\)".*|\1|' >> tmp_alternative_names
+      sed 's|^|'$gene' '$ID' |' tmp_alternative_names >> Gene_name_synonyms.txt
+   done
+done
+***
+
+Then I edited (by hand) the 'Gene_name_synonyms.txt' file to change the 'COUPTFII' of the first column of the 9 last lines into 'COUP-TFII'.
+
+3. PCT measurement for genes inside and outside the Dang et al. list of 299 genes:
+***
+cat /home/herve/Blaise/TargetScan_prediction_for_absent_miRNAs/Pan-vertebrate_alignment/Parsing_Blaise_results/For_elimination_of_overconserved_sites_in_other_analyses/vert_70_Conserved_Family_Info_overconservation_flagged_chr*.txt > TargetScan_predictions.txt
+
+echo "data_with=read.table('tmp_with_overconserved.dat',header=F)" > R_commands_with
+echo "data_without=read.table('tmp_without_overconserved.dat',header=F)" > R_commands_without
+echo "truc=list(min(data_with\$V11), median(data_with\$V11), max(data_with\$V11))" >> R_commands_with
+echo "names(truc)=c('min','median','max')" >> R_commands_with
+echo "write.csv(as.data.frame(truc),file='out_with.csv')" >> R_commands_with
+echo "truc=list(min(data_without\$V11), median(data_without\$V11), max(data_without\$V11))" >> R_commands_without
+echo "names(truc)=c('min','median','max')" >> R_commands_without
+echo "write.csv(as.data.frame(truc),file='out_without.csv')" >> R_commands_without
+
+
+echo "Gene min_PCT_with_overconserved median_PCT_with_overconserved max_PCT_with_overconserved min_PCT_without_overconserved median_PCT_without_overconserved max_PCT_without_overconserved" > PCT_for_haploinsufficient_hsa_genes.dat
+for gene in `cat hsa_haploinsufficient_genes.txt`
+do if test `grep -c '^'$gene' ' Gene_name_synonyms.txt` -eq 0
+   then grep -P '^\S+\t\S+\t'$gene'\t' TargetScan_predictions.txt
+   else for name in `grep '^'$gene' ' Gene_name_synonyms.txt | awk '{print $3}'`
+        do grep -P '^\S+\t\S+\t'$name'\t' TargetScan_predictions.txt
+        done
+   fi | awk '$11!="NULL" {print}' > tmp_with_overconserved.dat # Eliminating binding sites with undefined PCT
+   awk '$12!="yes" {print}' tmp_with_overconserved.dat > tmp_without_overconserved.dat # Eliminating binding sites which are over-conserved (i.e.: more conserved than the miRNA family)
+
+   R CMD BATCH R_commands_with
+   add1=`tail -1 out_with.csv | sed -e 's|^"1"|'$gene'|' -e 's|,| |g'`
+   if test `cat tmp_without_overconserved.dat | wc -l` -ne 0
+   then R CMD BATCH R_commands_without
+        add2=`tail -1 out_without.csv | sed 's|,| |g' | awk '{print $2,$3,$4}'`
+   else add2=`echo NA NA NA`
+   fi
+   echo $add1 $add2
+done >> PCT_for_haploinsufficient_hsa_genes.dat
+
+echo "Gene min_PCT_with_overconserved median_PCT_with_overconserved max_PCT_with_overconserved min_PCT_without_overconserved median_PCT_without_overconserved max_PCT_without_overconserved" > PCT_for_other_hsa_genes.dat
+for gene in `cat list_TargetScan_genes hsa_haploinsufficient_genes.txt hsa_haploinsufficient_genes.txt | sort | uniq -c | grep '^ *1 ' | awk '{print $2}'`
+do if test `grep -c '^'$gene' ' Gene_name_synonyms.txt` -eq 0
+   then grep -P '^\S+\t\S+\t'$gene'\t' TargetScan_predictions.txt
+   else for name in `grep '^'$gene' ' Gene_name_synonyms.txt | awk '{print $3}'`
+        do grep -P '^\S+\t\S+\t'$name'\t' TargetScan_predictions.txt
+        done
+   fi | awk '$11!="NULL" {print}' > tmp_with_overconserved.dat # Eliminating binding sites with undefined PCT
+   awk '$12!="yes" {print}' tmp_with_overconserved.dat > tmp_without_overconserved.dat # Eliminating binding sites which are over-conserved (i.e.: more conserved than the miRNA family)
+
+   R CMD BATCH R_commands_with
+   add1=`tail -1 out_with.csv | sed -e 's|^"1"|'$gene'|' -e 's|,| |g'`
+   if test `cat tmp_without_overconserved.dat | wc -l` -ne 0
+   then R CMD BATCH R_commands_without
+        add2=`tail -1 out_without.csv | sed 's|,| |g' | awk '{print $2,$3,$4}'`
+   else add2=`echo NA NA NA`
+   fi
+   echo $add1 $add2
+done >> PCT_for_other_hsa_genes.dat
+***
+
+4. Graphical display of the comparison:
+***
+echo "haploinsufficient=read.table('PCT_for_haploinsufficient_hsa_genes.dat',header=T)" > R_commands_boxplot
+echo "other=read.table('PCT_for_other_hsa_genes.dat',header=T)" >> R_commands_boxplot
+echo "n1=length(haploinsufficient\$max_PCT_with_overconserved)" >> R_commands_boxplot
+echo "n2=length(other\$max_PCT_with_overconserved)" >> R_commands_boxplot
+echo "p=signif(wilcox.test(haploinsufficient\$max_PCT_with_overconserved,other\$max_PCT_with_overconserved)\$p.value,digits=4)" >> R_commands_boxplot
+echo "postscript('Boxplot_haploinsufficient_vs_other_with_overconserved.ps',horizontal=F,paper='special',width=5,height=5)" >> R_commands_boxplot
+echo "boxplot(haploinsufficient\$max_PCT_with_overconserved,other\$max_PCT_with_overconserved,axes=F,main=paste('Wilcoxon test p-value =',p),ylab='Aggregate PCT')" >> R_commands_boxplot
+echo "axis(1,labels=c(paste('Known haplo-insufficient\ngenes (n=',n1,')',sep=''),paste('Other genes\n(n=',n2,')',sep='')),at=c(1,2),padj=0.5)" >> R_commands_boxplot
+echo "axis(2)" >> R_commands_boxplot
+echo "dev.off" >> R_commands_boxplot
+echo "n1=length(haploinsufficient\$max_PCT_without_overconserved)" >> R_commands_boxplot
+echo "n2=length(other\$max_PCT_without_overconserved)" >> R_commands_boxplot
+echo "p=signif(wilcox.test(haploinsufficient\$max_PCT_without_overconserved,other\$max_PCT_without_overconserved)\$p.value,digits=4)" >> R_commands_boxplot
+echo "postscript('Boxplot_haploinsufficient_vs_other_without_overconserved.ps',horizontal=F,paper='special',width=5,height=5)" >> R_commands_boxplot
+echo "boxplot(haploinsufficient\$max_PCT_without_overconserved,other\$max_PCT_without_overconserved,axes=F,main=paste('Wilcoxon test p-value =',p),ylab='Aggregate PCT')" >> R_commands_boxplot
+echo "axis(1,labels=c(paste('Known haplo-insufficient\ngenes (n=',n1,')',sep=''),paste('Other genes\n(n=',n2,')',sep='')),at=c(1,2),padj=0.5)" >> R_commands_boxplot
+echo "axis(2)" >> R_commands_boxplot
+echo "dev.off" >> R_commands_boxplot
+R CMD BATCH R_commands_boxplot
+***
+
+N.B.: even though the PCT was initially defined as a probability (Friedman et al., 2009), the latest version (v 7.0, described in Agarwal et al., 2015) has PCT scores higher than 1.
