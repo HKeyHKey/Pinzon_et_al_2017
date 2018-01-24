@@ -1,0 +1,41 @@
+1. Source of data:
+
+a) Baek et al's microarrays: from NCBI's GEO:
+GSM303277 miR-223_mutant
+GSM303487 miR-223_mutant
+GSM303488 miR-223_mutant
+GSM303489 wt
+GSM303490 wt
+GSM303491 wt
+
+b) TargetScan predictions: downloaded from http://www.targetscan.org/cgi-bin/targetscan/mmu_61/targetscan.cgi?species=Mouse&gid=&mir_sc=&mir_c=&mir_nc=&mirg=mmu-miR-223 (that's TargetScan Mouse, version 6.2, but apparently the file is exactly the same than in version 6.1; at least the miR-223 predictions are absolutely identical).
+
+c) Our microarrays:
+From files '1_RMA - Group 1.TXT' to '10_RMA - Group 1.TXT'.
+Microarray probe annotation: file 'Probeset_annotation.csv' copied from ~/Anna/Inter-individual_variability_in_neutrophils/Microarray_results/ except I added (by hand) the probesets for the three missing miR-223 targets (Srp54a, Srp54c and E330021D16Rik) after grepping these gene names in ~/Anna/Inter-individual_variability_in_neutrophils/Microarray_results/Array_documentation/HT_MG-430_PM.na32.annot.csv (NB: Srp54a and Srp54c have several probes in common, they can't really be distinguished by the array).
+
+
+
+2. Command:
+***
+./Script_variability_vs_miR-guided_June2014.sh | tail -n +3 > script_output.dat
+sed '1 s|out|script_output.dat|' ~/Anna/Inter-individual_variability_in_neutrophils/Microarray_results/R_parse > R_parse
+R CMD BATCH R_parse
+***
+
+3. Preparing a TeX table (supplementary table 1):
+***
+grep -v '(n=' Parsed_results.txt | perl -pe 's/\n//' | sed -e 's|"||g' -e 's|\[[0-9]*\] *||g' -e 's|  *|\
+|g' | sort | uniq > tmp_gene_list
+for gene in `cat tmp_gene_list`;do grep -A 6 '^\[1\] "Gene: Probeset: miRNA-guided fold-change in mRNA abundance (median-based):"$' Variability_vs_miR-guided_every_quantified_mRNA.txt | grep -A 2 '^\[1\] "'$gene'" ' | grep -v '\-\-' | sed '/^\[1\]/ {
+N
+s|\(.*\)\n\(.*\)|\1 \2|
+}' | sed '/^\[1\]/ {
+N
+s|\(.*\)\n\(.*\)|\1 \2|
+}' | awk '{print $2,$4,$3,$10,$11}' | sed 's|"||g';done > Results_every_target.dat
+for gene in `awk '{print $1}' Results_every_target.dat | sort | uniq`;do fc=`grep -m 1 '^'$gene' ' Results_every_target.dat | awk '{print $2}'`;grep '^'$gene' ' Results_every_target.dat | sed -e 's| |\&|g' -e '2,$ s|^'$gene'&'$fc'|\&|' -e 's|&0$|\&\$<10^{-5}\$|' -e 's|$|\\\\|' -e 's|_|\\_|g' -e '/^&/ !s|.*|\\hline\
+&|';done > table.tex
+./Module_cuts_TeX_table.pl table.tex > cut_table.tex
+***
+
