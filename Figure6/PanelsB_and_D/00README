@@ -1,0 +1,124 @@
+1. Seed match conservation measurement:
+See 'Seed_match_conservation_measurement.tar.bz2' for details. Resulting files are in 'Seed_match_conservation.tar.bz2'.
+
+2. miRNA and hairpin sequence and miRNA annotation data download (on March 16, 2015: that's miRBase release 21):
+
+***
+wget ftp://mirbase.org/pub/mirbase/CURRENT/high_conf_mature.fa.gz
+wget ftp://mirbase.org/pub/mirbase/CURRENT/hairpin.fa.gz
+wget ftp://mirbase.org/pub/mirbase/CURRENT/mature.fa.gz
+wget ftp://mirbase.org/pub/mirbase/CURRENT/high_conf_hairpin.fa.gz
+for f in `ls *.fa.gz`;do name=`echo $f | sed 's|\.fa\.gz$||'`;gunzip $f;mv $name'.fa' $name'Jun14.fa';done
+for f in `ls *hairpin*.fa`;do ~/Fuses_lines_clean.pl $f > Fused_$f;done
+wget ftp://mirbase.org/pub/mirbase/CURRENT/miRNA.dat.gz
+gunzip miRNA.dat.gz
+mv miRNA.dat miRNAJun14.dat
+wget ftp://mirbase.org/pub/mirbase/CURRENT/organisms.txt.gz
+gunzip organisms.txt.gz 
+mv organisms.txt organismsJun14.txt
+grep ';Vertebrata;' organismsJun14.txt | awk '{print $1}' > vertebrate_list
+***
+
+3. Finding the seeds that are present in some (potentially all) vertebrate species according to miRBase:
+***
+for species in `cat vertebrate_list`;do grep -w $species ../miRBase_data/seed2species.txt | awk '{print $1}';done | sort | uniq > vertebrate_seeds
+# To test 'Module_extracts_hairpin_from_seed.pl': establishment of a list of seeds not present in some species:
+for species in gga hsa mmu oan xtr fru tni;do for seed in `cat vertebrate_seeds`;do if test `grep -P '^'$seed'\t' ../miRBase_data/seed2species.txt | grep -wc $species` -eq 0;then echo $seed;fi;done > not_in_$species;done
+for species in gga hsa mmu oan xtr fru tni;do Rscript R_random_pick 'not_in_'$species;tail -n +2 out.csv | sed -e 's|.*,||' -e 's|"||g' > list;for seed in `cat list`;do echo $seed > seed_list;rm -f species_list;for s2 in gga hsa mmu oan xtr fru tni;do if test `grep -P '^'$seed'\t' ../miRBase_data/seed2species.txt | grep -wc $s2` -eq 0;then echo $s2 >> species_list;fi;done;./Module_extracts_hairpin_from_seed.pl seed_list species_list;done;done
+***
+
+4. Taxonomy analysis (in directory Seed_selection/):
+***
+cd Seed_selection/
+# Download of taxonomy information from NCBI:
+wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz
+tar -xzf taxdump.tar.gz
+# Generation of '*_seed_taxa.txt' files for both '2-7' and '2-8' seeds:
+for seed in `grep -v '>' /mnt/data/home/herve.seitz/Blaise/miRNA_absence_verification_by_Herve/Moulinette_sensitivity_control/matureJun14.fa | cut -c 2-8 | sort | uniq`;do tax_ID='';for species in `grep -B 1 '^.'$seed /mnt/data/home/herve.seitz/Blaise/miRNA_absence_verification_by_Herve/Moulinette_sensitivity_control/matureJun14.fa | grep '>' | sed -e 's|^> *||' -e 's|\-.*||' | sort | uniq`;do add_taxID=`grep ' '$species'$' ../Correspondance_table | awk '{print $1}'`;if test "$add_taxID" != "";then tax_ID=`echo $tax_ID','$add_taxID`;fi;done;if test "$tax_ID" != "";then echo `echo $seed | tr U T` $tax_ID;fi;done | sed 's| ,| |' > 2-8_seed_taxa.txt
+for seed in `grep -v '>' /mnt/data/home/herve.seitz/Blaise/miRNA_absence_verification_by_Herve/Moulinette_sensitivity_control/matureJun14.fa | cut -c 2-7 | sort | uniq`;do tax_ID='';for species in `grep -B 1 '^.'$seed /mnt/data/home/herve.seitz/Blaise/miRNA_absence_verification_by_Herve/Moulinette_sensitivity_control/matureJun14.fa | grep '>' | sed -e 's|^> *||' -e 's|\-.*||' | sort | uniq`;do add_taxID=`grep ' '$species'$' ../Correspondance_table | awk '{print $1}'`;if test "$add_taxID" != "";then tax_ID=`echo $tax_ID','$add_taxID`;fi;done;if test "$tax_ID" != "";then echo `echo $seed | tr U T` $tax_ID;fi;done | sed 's| ,| |' > 2-7_seed_taxa.txt
+#Generation of different 'out' files for human-centered and mouse-centered analyses:
+for assembly in `sed 's|.*\t||' /mnt/data/home/herve.seitz/Blaise/Pan-vertebrate_alignment/UCSC_species2genome.txt` #That's the 100 species used in the human-centered alignment
+do species=`grep -P '\t'$assembly'$' /mnt/data/home/herve.seitz/Blaise/Pan-vertebrate_alignment/UCSC_species2genome.txt | sed -e 's|\t'$assembly'||' -e 's| |+|g'`
+   wget -O dwnl1 http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy\&term=$species'+[orgn]'
+   echo `echo $species | sed 's|+| |g'`,$assembly,`grep '^<Id>' dwnl1 | sed -e 's|^<Id>||' -e 's|<\/Id>||'`
+   sleep 0.5
+done > Full_correspondance_table
+for assembly in `sed 's|.*\t||' /mnt/data/home/herve.seitz/Blaise/Pan-vertebrate_alignment_mouse_centered/UCSC_species2genome.txt` #That's the 60 species used in the mouse-centered alignment
+do species=`grep -P '\t'$assembly'$' /mnt/data/home/herve.seitz/Blaise/Pan-vertebrate_alignment_mouse_centered/UCSC_species2genome.txt | sed -e 's|\t'$assembly'||' -e 's| |+|g'`
+   wget -O dwnl1 http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy\&term=$species'+[orgn]'
+   echo `echo $species | sed 's|+| |g'`,$assembly,`grep '^<Id>' dwnl1 | sed -e 's|^<Id>||' -e 's|<\/Id>||'`
+   sleep 0.5
+done >> Full_correspondance_table
+sort Full_correspondance_table | uniq > tmp_corr
+mv tmp_corr Full_correspondance_table
+./Module_full_taxonomic_tree.pl nodes.dmp names.dmp Full_correspondance_table 9606
+mv Full_tree.txt Full_tree_hsa.txt
+./Module_full_taxonomic_tree.pl nodes.dmp names.dmp Full_correspondance_table 10090
+mv Full_tree.txt Full_tree_mmu.txt
+# Selection of species used in the human-centered 100 species whole genome alignment:
+for assembly in `cat /mnt/data/home/herve.seitz/Blaise/Pan-vertebrate_alignment/UCSC_genomes.txt`;do grep -w $assembly Full_correspondance_table;done | grep -v '^Gorilla gorilla gorilla' > Species_in_100species_alignment.txt
+***
+
+5. Using the taxonomic information in directory Seed_selection/ define a few clades of interest (with many miRNA families being specific to these clades): "Hominidae", "Catarrhini", "Boreoeutheria" and "Euteleostomi" for the human-centered analysis; "Murinae" and "Muroidea" for the mouse-centered analysis. For each of these clades: verify that miRNA families that are supposed to be specific to the clade (according to miRBase) really don't have obvious orthologs in species outside that clade:
+***
+for seed_def in '2-7' '2-8'
+do for clade in Hominidae Catarrhini Boreoeutheria Euteleostomi
+   do sed '/name: '$clade',/,$ d' Seed_selection/Full_tree_hsa.txt | sed -e 's|.*branched species: ||' -e 's| |\
+|g' | grep -v '^$' > species_outside_$clade
+      grep 'name: '$clade' ' Seed_selection/out_$seed_def'_hsa' | awk '{print $1}' | sed 's|$| '$clade'|'
+   done > seeds_to_be_analyzed_human-centered_$seed_def
+
+   for clade in Murinae Euarchontoglires Boreoeutheria Euteleostomi
+   do sed '/name: '$clade',/,$ d' Seed_selection/Full_tree_mmu.txt | sed -e 's|.*branched species: ||' -e 's| |\
+|g' | grep -v '^$' > species_outside_$clade
+      grep 'name: '$clade' ' Seed_selection/out_$seed_def'_mmu' | awk '{print $1}' | sed 's|$| '$clade'|'
+   done > seeds_to_be_analyzed_mouse-centered_$seed_def
+done
+
+for clade in Hominidae Catarrhini Boreoeutheria Euteleostomi Murinae Euarchontoglires
+do for species in `cat species_outside_$clade`
+   do assembly=`grep -w $species Seed_selection/Full_correspondance_table | awk -F ',' '{print $2}' | sort | tail -1` #when several assemblies are available, take the most recent one
+      if test -f ~/Genomes/Blast_indexes/$assembly'.fa.nin' # Because some of the genomes used for human-centered and mouse-centered UCSC whole genome alignments are actually not available from UCSC; we'll search for potential miRNA orthologs only in the genomes that I could download from UCSC
+      then echo $assembly
+      fi
+   done | sort | uniq > species_list_$clade
+done
+nohup ./Script_human-centered.sh 2-7 > nohup1_human_2-7.out & #(wait for a few seconds to prevent timestamp collision)
+nohup ./Script_human-centered.sh 2-7 > nohup2_human_2-7.out & #(wait for a few seconds)
+nohup ./Script_human-centered.sh 2-7 > nohup3_human_2-7.out & #(wait for a few seconds)
+nohup ./Script_human-centered.sh 2-7 > nohup4_human_2-7.out & #(wait for a few seconds)
+nohup ./Script_human-centered.sh 2-7 > nohup5_human_2-7.out & #(wait for a few seconds)
+nohup ./Script_human-centered.sh 2-7 > nohup6_human_2-7.out & #(wait for a few seconds)
+nohup ./Script_human-centered.sh 2-7 > nohup7_human_2-7.out & #(wait for a few seconds)
+nohup ./Script_human-centered.sh 2-7 > nohup8_human_2-7.out & #(wait for a few seconds)
+nohup ./Script_human-centered.sh 2-7 > nohup9_human_2-7.out & #(wait for a few seconds)
+***
+
+(results of 'Script_human-centered.sh' were saved in 'Exclusion_of_seeds_with_potential_orthologs_outside_clade.tar.bz2')
+
+
+6. For Suppl. Fig. 3:
+***
+for clade in Homininae Hominidae Hominoidea Catarrhini Simiiformes Primates Euarchontoglires Boreoeutheria Eutheria Theria Mammalia Amniota Tetrapoda Sarcopterygii Euteleostomi
+do sed '/name: '$clade',/,$ d' Seed_selection/Full_tree_hsa.txt | sed -e 's|.*branched species: ||' -e 's| |\
+|g' | grep -v '^$' > species_outside_$clade
+   for species in `cat species_outside_$clade`
+   do grep -w $species Species_in_100species_alignment.txt | awk -F ',' '{print $2}'
+   done | sort | uniq > species_list_100species_alignment_$clade
+done
+for clade in Homininae Hominidae Hominoidea Catarrhini Simiiformes Primates Euarchontoglires Boreoeutheria Eutheria Theria Mammalia Amniota Tetrapoda Sarcopterygii Euteleostomi
+do for species in `cat species_list_100species_alignment_$clade`
+   do assembly=`grep -w $species Seed_selection/Full_correspondance_table | awk -F ',' '{print $2}' | sort | tail -1` #when several assemblies are available, take the most recent one
+      if test -f ~/Genomes/Blast_indexes/$assembly'.fa.nin' # Because some of the genomes used for human-centered and mouse-centered UCSC whole genome alignments are actually not available from UCSC; we'll search for potential miRNA orthologs only in the genomes that I could download from UCSC
+      then echo $assembly
+      fi
+   done | sort | uniq > species_list_$clade
+done
+***
+
+7. Comparison of seed match conservation to seed conservation (excluding miRNAs with potential orthologs outside the clade of interest: see point 5 above):
+***
+cd Parsing_Blaise_results/
+./Script_parsing_Blaise_results.sh hsa 2-7
+Rscript R_boxplot_over-conserved_sites_final_version '2-7' human
+***
