@@ -1,0 +1,12 @@
+parsed=read.table('Parsed_2-7_human-centered.dat',header=T)
+compar=read.table('Comparison_to_miRanda.dat',header=T)
+h=parsed$Seed[parsed$Clade=='Hominidae']
+c=parsed$Seed[parsed$Clade=='Catarrhini']
+b=parsed$Seed[parsed$Clade=='Boreoeutheria']
+e=parsed$Seed[parsed$Clade=='Euteleostomi']
+pdf('Boxplot_over-conserved_sites_miRanda.pdf',width=7,height=6)
+boxplot(c(compar$Number_of_over.conserved_seed_matches/compar$Number_of_predicted_seed_matches)[is.element(compar$Seed,h)],c(compar$Number_of_over.conserved_seed_matches/compar$Number_of_predicted_seed_matches)[is.element(compar$Seed,c)],c(compar$Number_of_over.conserved_seed_matches/compar$Number_of_predicted_seed_matches)[is.element(compar$Seed,b)],c(compar$Number_of_over.conserved_seed_matches/compar$Number_of_predicted_seed_matches)[is.element(compar$Seed,e)],ylim=c(0,1),axes=F)
+axis(1,labels=c('Hominidae','Catarrhini','Boreoeutheria','Euteleostomi'),at=c(1:4))
+axis(2)
+dev.off()
+
