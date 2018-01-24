@@ -1,0 +1,171 @@
+1. CLIP data: adapter trimming and selection of reads longer than 20 nt:
+***
+for f in `ls *.fq.gz`;do gunzip $f;done
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3FM7BBXX-HKRDMOUamxNAAARAAPEI-210_L6_1.fq -o trimmed_m1-m2_rep1.fq -m 20
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3C3MBBXX-HKRDMOUamxNAABRAAPEI-211_L2_1.fq -o tmp_1.fq -m 20
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3FM7BBXX-HKRDMOUamxNAABRAAPEI-211_L8_1.fq -o tmp_2.fq -m 20
+cat tmp_1.fq tmp_2.fq > trimmed_m1-m2_rep2.fq
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3FM7BBXX-HKRDMOUamxNAACRAAPEI-212_L6_1.fq -o trimmed_m1-m2_rep3.fq -m 20
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3FM7BBXX-HKRDMOUamxNAADRAAPEI-213_L7_1.fq -o trimmed_m3_rep1.fq -m 20
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3FM7BBXX-HKRDMOUamxNAAERAAPEI-214_L7_1.fq -o trimmed_m3_rep2.fq -m 20
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3C3MBBXX-HKRDMOUamxNAAFRAAPEI-216_L2_1.fq -o tmp_1.fq -m 20
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3FM7BBXX-HKRDMOUamxNAAFRAAPEI-216_L8_1.fq -o tmp_2.fq -m 20
+cat tmp_1.fq tmp_2.fq > trimmed_m3_rep3.fq
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3FM7BBXX-HKRDMOUamxNAAGRAAPEI-218_L7_1.fq -o trimmed_m6_rep1.fq -m 20
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3C3MBBXX-HKRDMOUamxNAAHRAAPEI-219_L2_1.fq -o tmp_1.fq -m 20
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3FM7BBXX-HKRDMOUamxNAAHRAAPEI-219_L8_1.fq -o tmp_2.fq -m 20
+cat tmp_1.fq tmp_2.fq > trimmed_m6_rep2.fq
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3C3MBBXX-HKRDMOUamxNAAIRAAPEI-220_L2_1.fq -o tmp_1.fq -m 20
+cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC FCH3FM7BBXX-HKRDMOUamxNAAIRAAPEI-220_L6_1.fq -o tmp_2.fq -m 20
+cat tmp_1.fq tmp_2.fq > trimmed_m6_rep3.fq
+***
+
+2. CLIP data: genome mapping and transcript abundance measurement:
+***
+for fq in `ls *.fq` ; do name=`echo ${fq} | sed "s/\.fq//"`; Wrapper_RNA-Seq_RIP.sh ~/Natalia/RIP/RNAseq_IP_reelle/${fq} ${name} ~/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf ~/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/ 6 genes_and_mm10_abundant_ncRNAs ; done
+##Organize, sort and index BAM files and create SAM files to be used by HTseqcount (as described in Anders et al., Nature protocols 2013)
+samtools sort -n tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m1-m2_rep1_options_G/accepted_hits.bam m1-m2_rep1_sn
+samtools view -o m1-m2_rep1_sn.sam m1-m2_rep1_sn.bam
+samtools sort tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m1-m2_rep1_options_G/accepted_hits.bam m1-m2_rep1_s
+samtools index m1-m2_rep1_s.bam
+
+samtools sort -n tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m1-m2_rep2_options_G/accepted_hits.bam m1-m2_rep2_sn
+samtools view -o m1-m2_rep2_sn.sam m1-m2_rep2_sn.bam
+samtools sort tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m1-m2_rep2_options_G/accepted_hits.bam m1-m2_rep2_s
+samtools index m1-m2_rep2_s.bam
+
+samtools sort -n tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m1-m2_rep3_options_G/accepted_hits.bam m1-m2_rep3_sn
+samtools view -o m1-m2_rep3_sn.sam m1-m2_rep3_sn.bam
+samtools sort tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m1-m2_rep3_options_G/accepted_hits.bam m1-m2_rep3_s
+samtools index m1-m2_rep3_s.bam
+
+samtools sort -n tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m3_rep1_options_G/accepted_hits.bam m3_rep1_sn
+samtools view -o m3_rep1_sn.sam m3_rep1_sn.bam
+samtools sort tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m3_rep1_options_G/accepted_hits.bam m3_rep1_s
+samtools index m3_rep1_s.bam
+
+samtools sort -n tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m3_rep2_options_G/accepted_hits.bam m3_rep2_sn
+samtools view -o m3_rep2_sn.sam m3_rep2_sn.bam
+samtools sort tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m3_rep2_options_G/accepted_hits.bam m3_rep2_s
+samtools index m3_rep2_s.bam
+
+samtools sort -n tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m3_rep3_options_G/accepted_hits.bam m3_rep3_sn
+samtools view -o m3_rep3_sn.sam m3_rep3_sn.bam
+samtools sort tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m3_rep3_options_G/accepted_hits.bam m3_rep3_s
+samtools index m3_rep3_s.bam
+
+samtools sort -n tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m6_rep1_options_G/accepted_hits.bam m6_rep1_sn
+samtools view -o m6_rep1_sn.sam m6_rep1_sn.bam
+samtools sort tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m6_rep1_options_G/accepted_hits.bam m6_rep1_s
+samtools index m6_rep1_s.bam
+
+samtools sort -n tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m6_rep2_options_G/accepted_hits.bam m6_rep2_sn
+samtools view -o m6_rep2_sn.sam m6_rep2_sn.bam
+samtools sort tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m6_rep2_options_G/accepted_hits.bam m6_rep2_s
+samtools index m6_rep2_s.bam
+
+samtools sort -n tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m6_rep3_options_G/accepted_hits.bam m6_rep3_sn
+samtools view -o m6_rep3_sn.sam m6_rep3_sn.bam
+samtools sort tophat_genes_and_mm10_abundant_ncRNAs_trimmed_m6_rep3_options_G/accepted_hits.bam m6_rep3_s
+samtools index m6_rep3_s.bam
+
+#make counts reads file using HTSeq, version 0.5.4p3 (S Anders, T P Pyl, W Huber, Bioinformatics, 2014)
+## -a MINAQUAL, skip all reads with alignment quality lower than the given minimum value (default: 0)
+## -s STRANDED, whether the data is from a strand-specific assay. Specify 'yes', 'no', or 'reverse' (default: yes). 'reverse' means 'yes' with reversed strand interpretation
+MY_HOME=/mnt/data/home/herve.seitz
+
+[[ ! ${MY_HOME} ]] && echo "MY_HOME not defined" && exit 1
+htseq-count -s no -a 10 m1-m2_rep1_sn.sam ${MY_HOME}/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf > m1-m2_rep1.count
+htseq-count -s no -a 10 m1-m2_rep2_sn.sam ${MY_HOME}/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf > m1-m2_rep2.count
+htseq-count -s no -a 10 m1-m2_rep3_sn.sam ${MY_HOME}/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf > m1-m2_rep3.count
+htseq-count -s no -a 10 m3_rep1_sn.sam ${MY_HOME}/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf > m3_rep1.count
+htseq-count -s no -a 10 m3_rep2_sn.sam ${MY_HOME}/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf > m3_rep2.count
+htseq-count -s no -a 10 m3_rep3_sn.sam ${MY_HOME}/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf > m3_rep3.count
+htseq-count -s no -a 10 m6_rep1_sn.sam ${MY_HOME}/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf > m6_rep1.count
+htseq-count -s no -a 10 m6_rep2_sn.sam ${MY_HOME}/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf > m6_rep2.count
+htseq-count -s no -a 10 m6_rep3_sn.sam ${MY_HOME}/Natalia/RIP/RNAseq_pilote/Mus_musculus/UCSC/mm10/Annotation/Genes/genes_and_mm10_abundant_ncRNAs.gtf > m6_rep3.count
+
+#Merge counts file into 1 using merge_tables.py (downloaded from: http://dwheelerau.com/2013/04/15/how-to-use-deseq-to-analyse-rnaseq-data/):
+
+merge_tables.py guide_file_m1-m2
+mv merged_counts.txt merged_counts_m1-m2.txt
+merge_tables.py guide_file_m3
+mv merged_counts.txt merged_counts_m3.txt
+***
+
+3. Probing differential abundance:
+***
+R CMD BATCH commandes_edgeR_m1-m2.R
+R CMD BATCH commandes_edgeR_m3.R
+***
+
+4. Comparison to TargetScan predictions:
+***
+echo "id log2FoldChange pval padj" > EdgeR_TMM_m1m2_vs_m6.dat
+tail -n +2 /mnt/data/home/herve.seitz/Natalia/RIP/RNAseq_IP_reelle/TMM_ExactTest_m1-m2_vs_m6_adjust_method_BH.xls | awk '{print $1,-$2,$4,$5}' >> EdgeR_TMM_m1m2_vs_m6.dat
+echo "id log2FoldChange pval padj" > EdgeR_TMM_m3_vs_m6.dat
+tail -n +2 /mnt/data/home/herve.seitz/Natalia/RIP/RNAseq_IP_reelle/TMM_ExactTest_m3_vs_m6_adjust_method_BH.xls | awk '{print $1,-$2,$4,$5}' >> EdgeR_TMM_m3_vs_m6.dat
+for f in `ls *.dat`;do tail -n +2 $f | awk '{print $1}';done | sort | uniq > CLIP_names
+http://www.targetscan.org/mmu_61/mmu_61_data_download/Conserved_Site_Context_Scores.txt.zip # Downloaded on September 23, 2015
+unzip Conserved_Site_Context_Scores.txt.zip
+wget http://www.targetscan.org/mmu_61/mmu_61_data_download/Summary_Counts.txt.zip # Downloaded on September 23, 2015
+unzip Summary_Counts.txt.zip 
+head -1 Summary_Counts.txt > mmu_Summary_Counts.txt
+tail -n +2 Summary_Counts.txt | awk '$4==10090 {print}' >> mmu_Summary_Counts.txt 
+rm Summary_Counts.txt
+tail -n +2 mmu_Summary_Counts.txt | awk '{print $2}' | sort | uniq > TargetScan_names
+cat CLIP_names CLIP_names TargetScan_names | sort | uniq -c | grep '^ *2' | awk '{print $2}' > CLIP_names_absent_from_TargetScan
+./Script_synchronizes_annotations.sh CLIP_names_absent_from_TargetScan
+for f in `ls *_m1m2_vs_m6.dat`;do ./Module_CLIP_vs_TargetScan.pl GGAAUGU $f mmu_Summary_Counts.txt Synchronized_annotations_from_CLIP_names_absent_from_TargetScan;done
+for f in `ls *_m3_vs_m6.dat`;do ./Module_CLIP_vs_TargetScan.pl UUGGUCC $f mmu_Summary_Counts.txt Synchronized_annotations_from_CLIP_names_absent_from_TargetScan;done
+***
+
+5. Selection of CLIP-identified targets:
+***
+Rscript R_commands_selects_targets m1m2 EdgeR_TMM
+Rscript R_commands_selects_targets m3 EdgeR_TMM
+R CMD BATCH R_commands_display_targets_ordered_for_publication
+***
+
+6. Calculate target mRNA abundance:
+***
+R CMD BATCH R_commands_sum_of_target_abundance # That script uses files 'Abundances_of_target_according_to_CLIP_with_*' made by Module_sums_target_abundances.pl. See 'README_C2C12.md' for detailed tophat and cufflinks commands.
+for f in `ls Target_abundances_m*.txt`
+do sed -e 's|^\[1\] *||' -e 's|"||g' -e 's|  *| |' -e '1 s|.*|Gene mRNA_molecules_per_cell\
+&|' $f > `echo $f | sed 's|\.txt$|.dat|'`
+done # the resulting 'Target_abundances_*_EdgeR_TMM_adjusted_p_values_sample_*.dat' contain the number of target mRNA molecules per cell in each RNA-Seq sample
+***
+
+7. Looking for statistically enriched imperfect seed matches (tolerating 1 substitution, 1 insertion or 1 deletion):
+***
+for f in merged_counts_m1-m2.txt merged_counts_m3.txt;do tail -n +2 $f;done | grep -Pv '\t0\t0\t0\t0\t0$' | awk '{print $1}' | sort | uniq > Detected_mRNAs
+cp Detected_mRNAs UTR_sequence_download/
+cd UTR_sequence_download/
+./Script_download_UTR_sequences.sh # downloading UTR sequences for every detected mRNA (runs ~ overnight)
+cd ..
+cp UTR_sequence_download/Detected_mRNA_UTRs.fa .
+for seed_match in CATTCC GACCAA
+do ./Module_imperfect_seed_match_search.pl Detected_mRNA_UTRs.fa $seed_match genes.gtf
+done
+for oligo in m1m2 m3
+do case "$oligo" in "m1m2") seed_match=CATTCC;;
+                    "m3") seed_match=GACCAA;;
+   esac
+   for f in `ls Target_abundances_$oligo''*_p_values_sample_A.dat`
+   do radical=`echo $f | sed -e 's|Target_abundances_'$oligo'_||' -e 's|_sample_A.dat||'` 
+      Rscript R_commands_imperfect_matches_1000_picks $f $seed_match 'Picked_enriched_imperfect_matches_for_'$oligo'_in_'$radical'.txt'
+   done
+done
+***
+Result: the most enriched imperfect seed matches for miR-1/miR-206 in the m1m2 experiment are: C.ATTCC, CAT.CC and C.TTCC; for miR-133 in the m3 experiment: GACCA.A, G.ACCAA and GAC.CAA (so we will consider these matches as well as perfect seed matches).
+
+8. Calculating miRNA titrating effect for each identified target with at least one perfect seed match or one of the top 3 imperfect seed matches:
+***
+R CMD BATCH R_commands_CLIP_imperfect_site_loss_simulation
+***
+
+9. Plotting titrating effect dynamics:
+***
+for oligo in m1m2 m3;do for analysis in EdgeR_TMM;do for p_policy in adjusted;do if test `cat Titrating_effects_imperfect_sites_sample_*'_oligo_'$oligo'_'$analysis'_'$p_policy'_p_values.txt' | grep -v '^ *Gene Increase_in_free_miRNA_concentration_if_1_site_is_lost$' | grep -vc '^1 *$'` -ne 0;then echo $oligo $analysis $p_policy":";Rscript R_commands_display_titrating_dynamics_imperfect_sites $oligo $analysis $p_policy;fi;done;done;done
+***
+
