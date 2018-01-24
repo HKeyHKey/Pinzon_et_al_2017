@@ -1,0 +1,6 @@
+1. Data download (on April 15, 2015): from http://diana.imis.athena-innovation.gr/DianaTools/data/microT_CDS_data.tar.gz
+
+2. Analysis:
+***
+./Module_microT_false_positive_rate.pl microT_CDS_data.csv > Comparison_to_microT.dat
+***
