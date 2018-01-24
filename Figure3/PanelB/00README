@@ -1,0 +1,17 @@
+1. Regression analysis:
+
+It turns out that the relationship between RNA amount and signal on the Northern blot is not linear, rather quadratic (i.e.: signal is proportional to the square root of the amount of RNA).
+
+***
+R CMD BATCH R_commands_miRNA_quantification
+sed -e 's|  *| |g' -e 's|^\[[0-9]*,\] *||' -e '1 s|.*|day fmol_miRNA_in_replicate_1 fmol_miRNA_in_replicate_2 fmol_miRNA_in_replicate_3|' miR1_206_quantification_during_differentiation > miR-1_miR-206_quantification_during_differentiation.dat
+sed -e 's|  *| |g' -e 's|^\[[0-9]*,\] *||' -e '1 s|.*|day fmol_miRNA_in_replicate_1 fmol_miRNA_in_replicate_2 fmol_miRNA_in_replicate_3|' miR133_quantification_during_differentiation > miR-133_quantification_during_differentiation.dat
+***
+
+2. Conversion of the data (fmol miRNA per 20 microgram of total RNA) into molecules per cell:
+
+***
+R CMD BATCH R_commands_miRNA_molecules_per_cell
+sed -e 's|  *| |g' -e 's|^memo2 ||' -e '1 s|.*|Day Molecules_per_cell_replicate_1 Molecules_per_cell_replicate_2 Molecules_per_cell_replicate_3|' miR-1_miR-206_molecules_per_cell > miR-1_miR-206_molecules_per_cell.dat
+sed -e 's|  *| |g' -e 's|^memo2 ||' -e '1 s|.*|Day Molecules_per_cell_replicate_1 Molecules_per_cell_replicate_2 Molecules_per_cell_replicate_3|' miR-133_molecules_per_cell > miR-133_molecules_per_cell.dat
+***
