@@ -1,0 +1,117 @@
+Ailuropoda melanoleuca,ailMel1,944575 9646
+Alligator mississippiensis,allMis1,8496
+Amazona vittata,amaVit1,241585
+Anas platyrhynchos,anaPla1,8840 8839
+Anolis carolinensis,anoCar2,28377
+Apalone spinifera,apaSpi1,387431 387430 387429 387428 387427 227461 227460 55534
+Ara macao,araMac1,176014
+Astyanax mexicanus,astMex1,7994
+Bos taurus,bosTau7,9913
+Callithrix jacchus,calJac3,9483
+Camelus ferus,camFer1,419612
+Canis lupus familiaris,canFam3,9615
+Capra hircus,capHir1,9925
+Cavia porcellus,cavPor3,10141
+Ceratotherium simum,cerSim1,310713 73337 9807
+Chelonia mydas,cheMyd1,673462 8469
+Chinchilla lanigera,chiLan1,34839
+Chlorocebus sabaeus,chlSab1,60711
+Choloepus hoffmanni,choHof1,9358
+Chrysemys picta bellii,chrPic1,8478
+Chrysochloris asiatica,chrAsi1,185453
+Columba livia,colLiv1,8932
+Condylura cristata,conCri1,143302
+Cricetulus griseus,criGri1,10029
+Danio rerio,danRer7,7955
+Dasypus novemcinctus,dasNov3,9361
+Dipodomys ordii,dipOrd1,1258737 10020
+Echinops telfairi,echTel1,9371
+Echinops telfairi,echTel2,9371
+Elephantulus edwardii,eleEdw1,28737
+Eptesicus fuscus,eptFus1,29078
+Equus caballus,equCab2,1114792 9796
+Erinaceus europaeus,eriEur1,9365
+Erinaceus europaeus,eriEur2,9365
+Falco cherrug,falChe1,495999 345166 345165 345164
+Falco peregrinus,falPer1,495995 495993 495992 495991 495990 495989 495987 495984 495983 495982 495981 335097 8954
+Felis catus,felCat5,9685
+Ficedula albicollis,ficAlb2,59894
+Gadus morhua,gadMor1,1617256 328277 328276 8053 8049
+Gallus gallus,galGal4,405000 400035 208526 208525 208524 9031
+Gasterosteus aculeatus,gasAcu1,481462 481459 69293
+Geospiza fortis,geoFor1,48883
+Gorilla gorilla,gorGor3,406788 183511 9595 9593
+Gorilla gorilla gorilla,gorGor3,9595
+Haplochromis burtoni,hapBur1,8153
+Heterocephalus glaber,hetGla2,10181
+Homo sapiens,hg19,741158 63221 9606
+Jaculus jaculus,jacJac1,1567021 347513 51337
+Latimeria chalumnae,latCha1,7897
+Lepisosteus oculatus,lepOcu1,7918
+Leptonychotes weddellii,lepWed1,9713
+Loxodonta africana,loxAfr3,691503 9785
+Macaca fascicularis,macFas5,1215360 90386 9541
+Macaca mulatta,rheMac3,1654737 1449913 9544
+Macropus eugenii,macEug2,9315
+Maylandia zebra,mayZeb1,106582
+Meleagris gallopavo,melGal1,165260 109974 109973 109972 9103
+Melopsittacus undulatus,melUnd1,13146
+Mesocricetus auratus,mesAur1,10036
+Microcebus murinus,micMur1,30608
+Microtus ochrogaster,micOch1,79684
+Monodelphis domestica,monDom5,13616
+Mus musculus,mm10,1643390 1385377 1266728 947985 477816 477815 179238 116058 80274 57486 46456 39442 35531 10092 10091 10090
+Mustela putorius furo,musFur1,9669
+Myotis davidii,myoDav1,225400
+Myotis lucifugus,myoLuc2,384942 384941 384940 164660 59463
+Neolamprologus brichardi,neoBri1,32507
+Nomascus leucogenys,nomLeu2,61853
+Nomascus leucogenys,nomLeu3,61853
+Ochotona princeps,ochPri2,9978
+Ochotona princeps,ochPri3,9978
+Octodon degus,octDeg1,10160
+Odobenus rosmarus divergens,odoRosDiv1,9708
+Orcinus orca,orcOrc1,9733
+Oreochromis niloticus,oreNil2,607699 158785 87885 8128
+Ornithorhynchus anatinus,ornAna1,9258
+Orycteropus afer afer,oryAfe1,1230840
+Oryctolagus cuniculus,oryCun2,568996 230741 9986
+Oryzias latipes,oryLat2,8090
+Otolemur garnettii,otoGar3,477174 30611
+Ovis aries,oviAri1,30528 9940 9938
+Ovis aries,oviAri3,30528 9940 9938
+Pantholops hodgsonii,panHod1,59538
+Pan troglodytes,panTro4,1294088 756884 91950 37012 37011 37010 9598
+Papio hamadryas,papHam1,9562 9557
+Pelodiscus sinensis,pelSin1,34908 13735
+Petromyzon marinus,petMar1,7757
+Petromyzon marinus,petMar2,7757
+Pongo pygmaeus abelii,ponAbe2,9601
+Procavia capensis,proCap1,9814 9813
+Pseudopodoces humilis,pseHum1,181119
+Pteropus alecto,pteAle1,9402
+Pteropus vampyrus,pteVam1,132908
+Pundamilia nyererei,punNye1,303518
+Rattus norvegicus,rn5,947987 10116
+Saimiri boliviensis,saiBol1,495297 39432 27679
+Sarcophilus harrisii,sarHar1,9305
+Sorex araneus,sorAra1,42254
+Sorex araneus,sorAra2,42254
+Spermophilus tridecemlineatus,speTri2,100392 43179
+Sus scrofa,susScr3,1170810 490583 415978 375579 375578 310261 310260 309914 309913 291050 9825 9823
+Taeniopygia guttata,taeGut1,59729
+Taeniopygia guttata,taeGut2,59729
+Takifugu flavidus,takFla1,433684
+Takifugu rubripes,fr3,47663 31033
+Tarsius syrichta,tarSyr1,9478
+Tetraodon nigroviridis,tetNig2,99883
+Trichechus manatus latirostris,triMan1,127582
+Tupaia belangeri,tupBel1,37347
+Tupaia chinensis,tupChi1,246437
+Tursiops truncatus,turTru2,152705 9739
+Vicugna pacos,vicPac1,273913 273912 30538
+Vicugna pacos,vicPac2,273913 273912 30538
+Xenopus tropicalis,xenTro3,8364
+Xenopus tropicalis,xenTro7,8364
+Xiphophorus maculatus,xipMac1,8083
+Zonotrichia albicollis,zonAlb1,44394

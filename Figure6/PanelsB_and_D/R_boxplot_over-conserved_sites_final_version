@@ -1,0 +1,99 @@
+args <- commandArgs(TRUE)
+seed_def=args[1]
+ref=args[2]
+suffix=paste(seed_def,'_',ref,'-centered',sep='')
+
+data=read.table(paste('Control_',suffix,'.dat',sep=''),header=T)
+
+pdf(paste('Boxplot_over-conserved_sites_proportion_',suffix,'.pdf',sep=''),width=7,height=6)
+if (ref=='human')
+{
+boxplot(c(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[data$Clade_of_seed=='Hominidae' & data$Analyzed_clade=='Hominidae'],c(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[data$Clade_of_seed=='Catarrhini' & data$Analyzed_clade=='Catarrhini'],c(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[data$Clade_of_seed=='Boreoeutheria' & data$Analyzed_clade=='Boreoeutheria'],c(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[data$Clade_of_seed=='Euteleostomi' & data$Analyzed_clade=='Euteleostomi'],axes=F,ylab='Proportion of over-conserved sites',ylim=c(0,1),xlab='Clade-specific miRNA families')
+axis(1,labels=c('Hominidae','Catarrhini','Boreoeutheria','Euteleostomi'),at=c(1:4))
+} else
+{
+boxplot(c(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[data$Clade_of_seed=='Murinae' & data$Analyzed_clade=='Murinae'],c(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[data$Clade_of_seed=='Boreoeutheria' & data$Analyzed_clade=='Boreoeutheria'],c(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[data$Clade_of_seed=='Euteleostomi' & data$Analyzed_clade=='Euteleostomi'],axes=F,ylab='Proportion of over-conserved sites',ylim=c(0,1),xlab='Clade-specific miRNA families')
+axis(1,labels=c('Murinae','Boreoeutheria','Euteleostomi'),at=c(1:3))
+}
+axis(2)
+dev.off()
+
+if (ref=='human')
+{
+h=unique(data$Seed[data$Clade_of_seed=='Hominidae'])
+c=unique(data$Seed[data$Clade_of_seed=='Catarrhini'])
+}
+if (ref=='mouse')
+{
+h=unique(data$Seed[data$Clade_of_seed=='Murinae'])
+}
+b=unique(data$Seed[data$Clade_of_seed=='Boreoeutheria'])
+e=unique(data$Seed[data$Clade_of_seed=='Euteleostomi'])
+n=unique(data$Seed[data$Clade_of_seed=='non_seed'])
+
+
+pdf(paste('Control_shallow_vs_deep_seeds_',suffix,'.pdf',sep=''),width=8,height=6)
+if (ref=='human')
+{
+boxplot(
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,n) & data$Analyzed_clade=='Hominidae'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade=='Hominidae'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,c) & data$Analyzed_clade=='Hominidae'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade=='Hominidae'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade=='Hominidae'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,n) & data$Analyzed_clade=='Catarrhini'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade=='Catarrhini'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,c) & data$Analyzed_clade=='Catarrhini'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade=='Catarrhini'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade=='Catarrhini'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,n) & data$Analyzed_clade=='Boreoeutheria'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade=='Boreoeutheria'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,c) & data$Analyzed_clade=='Boreoeutheria'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade=='Boreoeutheria'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade=='Boreoeutheria'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,n) & data$Analyzed_clade=='Euteleostomi'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade=='Euteleostomi'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,c) & data$Analyzed_clade=='Euteleostomi'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade=='Euteleostomi'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade=='Euteleostomi'],
+ylim=c(0,1),axes=F)
+} else
+{
+boxplot(
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,n) & data$Analyzed_clade=='Murinae'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade=='Murinae'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade=='Murinae'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade=='Murinae'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,n) & data$Analyzed_clade=='Boreoeutheria'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade=='Boreoeutheria'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade=='Boreoeutheria'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade=='Boreoeutheria'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,n) & data$Analyzed_clade=='Euteleostomi'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade=='Euteleostomi'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade=='Euteleostomi'],
+(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade=='Euteleostomi'],
+ylim=c(0,1),axes=F)
+}
+
+axis(1);axis(2)
+dev.off()
+
+sink(paste('Significance_of_differences_between_seed_groups_',suffix,'.txt',sep=''))
+if (ref=='human')
+{
+clade='Hominidae'
+kruskal.test(list((data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,c) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade==clade]))
+clade='Catarrhini'
+kruskal.test(list((data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,c) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade==clade]))
+}
+if (ref=='mouse')
+{
+clade='Murinae'
+kruskal.test(list((data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade==clade]))
+}
+clade='Boreoeutheria'
+kruskal.test(list((data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade==clade]))
+clade='Euteleostomi'
+kruskal.test(list((data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,h) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,b) & data$Analyzed_clade==clade],(data$Number_of_seed_matches_in_UTR_alignment_outside_of_analyzed_clade/data$Number_of_seed_matches_in_UTR_alignment)[is.element(data$Seed,e) & data$Analyzed_clade==clade]))
+
+sink()
