@@ -1,0 +1,12 @@
+1. miRanda prediction data download (on April 13, 2015):
+***
+wget http://cbio.mskcc.org/microrna_data/human_predictions_S_C_aug2010.txt.gz
+wget http://cbio.mskcc.org/microrna_data/human_predictions_S_0_aug2010.txt.gz
+for f in `ls *.gz`;do gunzip $f;done
+cat human_predictions_S_* > human_predictions_aug2010.txt
+***
+
+2. Comparison to over-conserved seed matches:
+***
+./Module_miranda_false_positive_rate.pl human_predictions_aug2010.txt > Comparison_to_miRanda.dat
+***
