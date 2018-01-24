@@ -1,0 +1,67 @@
+for (strategy in c('including','excluding'))
+
+{
+
+for (tissue in c('liver','heart','muscle','soleus_muscle','tibialis_anterior_muscle','12_month_striatum','24_month_striatum','brain','cerebral_cortex','E11.5_embryonic_head','E13.5_embryonic_head','hypothalamus','pituitary_gland','bone_marrow','memory_P14_T_cells','naive_B_cells','spleen','splenic_B_cells','thymus'))
+
+{
+
+if (tissue=='liver')
+{
+specific_miRNAs=c('miR-122-5p')
+nonspecific_miRNAs=c('miR-1a-3p','miR-124-3p','miR-138-5p','miR-9-5p','miR-181a-5p','miR-150-5p')
+}
+if ((tissue=='heart') | (tissue=='muscle') | (tissue=='soleus_muscle') | (tissue=='tibialis_anterior_muscle'))
+{
+specific_miRNAs=c('miR-1a-3p')
+nonspecific_miRNAs=c('miR-122-5p','miR-124-3p','miR-138-5p','miR-9-5p','miR-181a-5p','miR-150-5p')
+}
+if ((tissue=='12_month_striatum') | (tissue=='24_month_striatum') | (tissue=='brain') | (tissue=='cerebral_cortex') | (tissue=='E11.5_embryonic_head') | (tissue=='E13.5_embryonic_head') | (tissue=='hypothalamus') | (tissue=='pituitary_gland'))
+{
+specific_miRNAs=c('miR-124-3p','miR-138-5p','miR-9-5p')
+nonspecific_miRNAs=c('miR-122-5p','miR-1a-3p','miR-181a-5p','miR-150-5p')
+}
+
+if ((tissue=='bone_marrow') | (tissue=='memory_P14_T_cells') | (tissue=='naive_B_cells') | (tissue=='spleen') | (tissue=='splenic_B_cells') | (tissue=='thymus'))
+{
+specific_miRNAs=c('miR-181a-5p','miR-150-5p') #miR-181a is a B cell-specific miRNA according to Chen et al.: http://www.ncbi.nlm.nih.gov/pubmed?term=14657504
+nonspecific_miRNAs=c('miR-122-5p','miR-1a-3p','miR-124-3p','miR-138-5p','miR-9-5p')
+}
+
+for_volcano=read.table(paste('correlation_summary_in_',tissue,'_',strategy,'_over-conserved_sites.dat',sep=''),header=T)
+if (length(for_volcano$tau[is.element(for_volcano$RNA,nonspecific_miRNAs)])!=0)
+{
+qval=p.adjust(for_volcano$p_value,method='BH')
+postscript(paste('Non-specific_miRNAs_in_',tissue,'_',strategy,'_over-conserved_sites.ps',sep=''),paper='special',horizontal=F,width=5,height=5)
+plot(for_volcano$tau[!is.element(for_volcano$RNA,nonspecific_miRNAs)],qval[!is.element(for_volcano$RNA,nonspecific_miRNAs)],xlim=c(-.3,.3),ylim=c(1e-16,1),log='y',xlab=expression(paste("Kendall's ",tau)),ylab='Adjusted p-value',axes=F,main=tissue)
+par(new=T)
+plot(for_volcano$tau[is.element(for_volcano$RNA,nonspecific_miRNAs)],qval[is.element(for_volcano$RNA,nonspecific_miRNAs)],xlim=c(-.3,.3),ylim=c(1e-16,1),log='y',xlab='',ylab='',axes=F,col='red',pch=16)
+axis(1,labels=c(-0.3,-0.1,0,0.1,0.3),at=c(-0.3,-0.1,0,0.1,0.3))
+axis(2,labels=c(1e-16,1e-12,1e-8,1e-4,1),at=c(1e-16,1e-12,1e-8,1e-4,1))
+lines(c(-0.3,0.3),c(0.05,0.05),col='red',lty=3,lwd=2)
+lines(c(0,0),c(1e-16,1),lty=3,lwd=2)
+for (RNA in nonspecific_miRNAs)
+if (length(for_volcano$tau[for_volcano$RNA==RNA])!=0)
+text(for_volcano$tau[for_volcano$RNA==RNA],qval[for_volcano$RNA==RNA],RNA,col='red',pos=1)
+dev.off()
+
+postscript(paste('Specific_and_non-specific_miRNAs_in_',tissue,'_',strategy,'_over-conserved_sites.ps',sep=''),paper='special',horizontal=F,width=5,height=5)
+plot(for_volcano$tau[!is.element(for_volcano$RNA,specific_miRNAs) & !is.element(for_volcano$RNA,nonspecific_miRNAs)],qval[!is.element(for_volcano$RNA,specific_miRNAs) & !is.element(for_volcano$RNA,nonspecific_miRNAs)],xlim=c(-.25,.25),ylim=c(1e-16,1),log='y',xlab=expression(paste("Kendall's ",tau)),ylab='Adjusted p-value',axes=F,main=tissue)
+par(new=T)
+plot(for_volcano$tau[is.element(for_volcano$RNA,specific_miRNAs)],qval[is.element(for_volcano$RNA,specific_miRNAs)],xlim=c(-.25,.25),ylim=c(1e-16,1),log='y',xlab='',ylab='',axes=F,col='blue',pch=16)
+par(new=T)
+plot(for_volcano$tau[is.element(for_volcano$RNA,nonspecific_miRNAs)],qval[is.element(for_volcano$RNA,nonspecific_miRNAs)],xlim=c(-.25,.25),ylim=c(1e-16,1),log='y',xlab='',ylab='',axes=F,col='red',pch=16)
+axis(1,labels=c(-0.25,-0.1,0,0.1,0.25),at=c(-0.25,-0.1,0,0.1,0.25))
+axis(2,labels=c(1e-16,1e-12,1e-8,1e-4,1),at=c(1e-16,1e-12,1e-8,1e-4,1))
+lines(c(-0.25,0.25),c(0.05,0.05),col='red',lty=3,lwd=2)
+lines(c(0,0),c(1e-16,1),lty=3,lwd=2)
+for (RNA in specific_miRNAs)
+if (length(for_volcano$tau[for_volcano$RNA==RNA])!=0)
+text(for_volcano$tau[for_volcano$RNA==RNA],qval[for_volcano$RNA==RNA],RNA,col='blue',pos=1)
+for (RNA in nonspecific_miRNAs)
+if (length(for_volcano$tau[for_volcano$RNA==RNA])!=0)
+text(for_volcano$tau[for_volcano$RNA==RNA],qval[for_volcano$RNA==RNA],RNA,col='red',pos=1)
+dev.off()
+}
+}
+}
