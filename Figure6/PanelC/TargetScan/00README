@@ -1,0 +1,63 @@
+1. Data download from TargetScan human (version 7.0, downloaded on September 16, 2015):
+***
+wget http://www.targetscan.org/vert_70/vert_70_data_download/Conserved_Site_Context_Scores.txt.zip
+wget http://www.targetscan.org/vert_70/vert_70_data_download/Nonconserved_Site_Context_Scores.txt.zip
+unzip Conserved_Site_Context_Scores.txt.zip
+unzip Nonconserved_Site_Context_Scores.txt.zip
+awk '$4==9606 {print}' Conserved_Site_Context_Scores.txt > Human_conserved_sites.txt
+awk '$4==9606 {print}' Nonconserved_Site_Context_Scores.txt > Human_nonconserved_sites.txt
+cat Human_conserved_sites.txt Human_nonconserved_sites.txt > Human_sites.txt
+wget http://www.targetscan.org/vert_70/vert_70_data_download/UTR_Sequences.txt.zip
+unzip UTR_Sequences.txt.zip
+awk '$4==9606 {print ">"$1,$3"\n"$5}' UTR_Sequences.txt | sed '/^>/ !s|-||g' > Human_UTR_sequences.fa
+***
+
+
+2. Gene coordinates on hg19:
+***
+wget http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz #downloaded on August 21, 2015 (the version at ~/Blaise/RefSeq/refGene.txt is apparently lacking some genes, like TDRD15 for example)
+gunzip refGene.txt.gz
+***
+
+3. Annotation of TargetScan-identified "conserved sites" with their genomic coordinates in hg19:
+***
+awk '{print $2}' Human_sites.txt | sort | uniq > gene_names_for_TargetScan
+awk '{print $13}' refGene.txt | sort | uniq > gene_names_for_UCSC
+cat gene_names_for_TargetScan gene_names_for_TargetScan gene_names_for_UCSC | sort | uniq -c | awk '{print $1}' | sort -g | uniq -c # Result: 18405 genes have the same name in both files, 921 TargetScan genes have a name unknown to UCSC, and 7985 UCSC names are not found in the TargetScan file
+#Below: gene name synchronization using GenBank:
+echo "TargetScan_name Synonym" > Gene_name_conversion.txt
+for gene in `cat gene_names_for_TargetScan gene_names_for_TargetScan gene_names_for_UCSC | sort | uniq -c | grep '^ *2 ' | awk '{print $2}'`
+do wget -O esearch_Synonyms_$gene http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gene\&term=Homo+sapiens[orgn]$gene
+   for ID in `grep '^<Id>' esearch_Synonyms_$gene | sed -e 's|^<Id>||' -e 's|</Id>||'`
+   do wget -O efetch_Synonyms_$gene http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene\&id=$ID
+      sleep 0.5
+      sed -e '1,/^ *gene {/ d' -e '/^ *syn {$/,/^ *}$/ !d' efetch_Synonyms_$gene | grep -v '^ *syn {$' | grep -v '^ *}$' | sed -e 's|^ *"|'$gene' |' -e 's|",*$||'
+   done
+done >> Gene_name_conversion.txt
+head -1 Gene_name_conversion.txt > tmp_header
+tail -n +2 Gene_name_conversion.txt | sort | uniq >> tmp_header 
+mv tmp_header Gene_name_conversion.txt 
+#Above: gene name synchronization using GenBank
+./Module_converts_UTR_coordinates_into_genomic_coordinates_TargetScan7.pl Human_sites.txt refGene.txt > Human_sites_with_genomic_coordinates.txt 
+***
+
+('Human_conserved_sites_with_genomic_coordinates.txt' and 'Human_sites_with_genomic_coordinates.txt' only contain information for genes for which UTR coordinates are given in UCSC's 'refGene.txt' file; so that's 12132 genes, out of 12424 genes in 'Human_conserved_sites.txt'; and 18615 genes, out of 19326 in 'Human_sites.txt')
+
+
+4. miRNA information dowload (on August 21, 2015):
+***
+wget http://www.targetscan.org/vert_70/vert_70_data_download/miR_Family_Info.txt.zip
+unzip miR_Family_Info.txt.zip
+***
+
+5. Comparison of TargetScan predictions with over-conserved seed match lists:
+***
+./Module_TargetScan_false_positive_rate.pl Human_sites_with_genomic_coordinates.txt > Comparison_to_TargetScan_with_nonconserved_sites.dat
+./Module_TargetScan_false_positive_rate.pl Human_conserved_sites_with_genomic_coordinates.txt > Comparison_to_TargetScan_without_nonconserved_sites.dat
+***
+
+6. Statistics on the type of sites analyzed by TargetScan:
+***
+for miRNA in `awk '{print $8}' Human_conserved_sites_with_genomic_coordinates.txt | sort | uniq`;do awk '$4=="'$miRNA'" {print $2}' miR_Family_Info.txt;done | sort | uniq > seeds_analyzed_by_TargetScan # Result: 233 seeds are analyzed by TargetScan 7.0 Human
+./Module_TargetScan_result_coverage.pl Human_sites.txt refGene.txt 
+***
